@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
     "homePage-chrome": "npx playwright test home_page_tests.spec.ts --project=chromium"
   },
   "keywords": [],
