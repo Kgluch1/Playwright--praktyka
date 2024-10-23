@@ -28,23 +28,29 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    extraHTTPHeaders: {
+      'Authorization': `Token ${process.env.ACCESS_TOKEN}`}
   },
 
   /* Configure projects for major browsers */
   projects: [
+    {name: 'setup', testMatch: 'auth.setup.ts'},
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' },
+      dependencies: ['setup']
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { ...devices['Desktop Firefox'], storageState: '.auth/user.json' },
+      dependencies: ['setup']
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: { ...devices['Desktop Safari'], storageState: '.auth/user.json' },
+      dependencies: ['setup']
     },
 
     /* Test against mobile viewports. */
@@ -69,9 +75,8 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: 'npm run start',
+    url: 'http://127.0.0.1:5500/',
+  },
 });
