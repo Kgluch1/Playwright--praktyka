@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { ProductsPage } from '../../page-objects/ProductsPage';
 import { SingleProductPage } from '../../page-objects/SingleProductPage';
 import { Navigation } from '../../page-objects/NavigationBar';
+import { HomePage } from '../../page-objects/HomePage';
+import { BasketPage } from '../../page-objects/BasketPage';
 
 
 test.beforeEach('Go to website', async ({page}) => {
@@ -15,58 +17,89 @@ test.beforeEach('Go to website', async ({page}) => {
   
 })
 
-test.describe('Home Page testing', () => {
+test.describe('Home Page testing', async () => {
 
 test('Homepage has 3 sliders', async ({ page }) => {
-  await expect(page.locator('.n2-ss-slider-1')).toBeVisible()
-  await expect(page.locator('.n2-ss-slider-2')).toBeVisible()
-  await expect(page.locator('.n2-ss-slider-3')).toBeVisible()
-  
+  const homePage = new HomePage(page)
+  await homePage.sildersCheck()
+
 });
 test('Homepage has 3 arrivals', async({page}) => {
-  const arrival = page.locator('.woocommerce-LoopProduct-link')
-  await expect(arrival).toHaveCount(3)
+  const homePage = new HomePage(page)
+  await homePage.arrivalsCheck()
 })
 test('Arrivals on homepage should navigate', async({page}) => {
-  const arrival = page.locator('.woocommerce-LoopProduct-link')
-  await expect(arrival).toHaveCount(3)
-  await arrival.nth(1).click()
-  const addToBasketButton = page.getByRole('button', {name: 'Add to basket'})
-  await expect(addToBasketButton).toBeVisible()
-  await expect(page).toHaveURL(new RegExp('^https://practice.automationtesting.in/product/'))
+  const homePage = new HomePage(page)
+  const singleProductPage = new SingleProductPage(page)
+  await homePage.arrivalsCheck()
+  await homePage.navigateToFirstArrival()
+  await singleProductPage.verifyUserCanSeeAddToCartButton()
 })
 test('Home page Arrivals has correct images description', async({page}) => {
-  const arrival = page.locator('.woocommerce-LoopProduct-link')
-  await expect(arrival).toHaveCount(3)
-  await arrival.nth(1).click()
-  const addToBasketButton = page.getByRole('button', {name: 'Add to basket'})
-  await expect(addToBasketButton).toBeVisible()
-  await expect(page).toHaveURL(new RegExp('^https://practice.automationtesting.in/product/'))
-  await page.locator('.description_tab').click()
-  const productTitle = page.locator('.product_title').textContent()
-  const productDescription = await page.locator('.woocommerce-Tabs-panel').first().textContent()
-  await expect(productDescription).toContain('This book provides you with an intermediate knowledge of HTML')
-  // .locator('p')).toHaveText(`${productTitle}`)
-})
-  test('Home page Arrivals-Images reviews', async ({page}) => {
-  const arrival = page.locator('.woocommerce-LoopProduct-link')
-  await expect(arrival).toHaveCount(3)
-  await arrival.nth(1).click()
-  const addToBasketButton = page.getByRole('button', {name: 'Add to basket'})
-  await expect(addToBasketButton).toBeVisible()
-  await expect(page).toHaveURL(new RegExp('^https://practice.automationtesting.in/product/'))
-  const reviewsButton = await page.locator('.reviews_tab')
-  await expect(reviewsButton).toBeVisible()
-  const reviewTitleText = page.locator('#reply-title').textContent()
-  await expect(reviewTitleText).toContain('HTML')
-  })
-  test('Home page Arrivals - Add to basker', async ({page}) => {
+  const homePage = new HomePage(page)
   const singleProductPage = new SingleProductPage(page)
-  const arrival = page.locator('.woocommerce-LoopProduct-link')
-  const basketCounter = page.locator('.wpmenucartli').locator('.amount')
-  await expect(arrival).toHaveCount(3)
-  await arrival.nth(1).click()
+  await homePage.arrivalsCheck()
+  await homePage.navigateToFirstArrival()
+  await singleProductPage.verifyUserCanSeeAddToCartButton()
+  await singleProductPage.getProductDescription()
+})
+test('Home page Arrivals-Images reviews', async ({page}) => {
+  const homePage = new HomePage(page)
+  const singleProductPage = new SingleProductPage(page)
+  await homePage.arrivalsCheck()
+  await homePage.navigateToFirstArrival()
+  await singleProductPage.verifyUserCanSeeAddToCartButton()
+  await singleProductPage.getProductDescription()
+  await singleProductPage.getProductReview()
+  })
+test('Home page Arrivals - Add to basket', async ({page}) => {
+  const singleProductPage = new SingleProductPage(page)
+  const homePage = new HomePage(page)
+  await homePage.navigateToFirstArrival()
   await singleProductPage.addItemToBasket(20)
   })
-  
+  test('Home Arrivals - Add to basket - items', async ({page}) => {
+    const singleProductPage = new SingleProductPage(page)
+    const homePage = new HomePage(page)
+    await homePage.navigateToFirstArrival()
+    await singleProductPage.addItemToBasket(20)
+    await singleProductPage.goToCartButton()
+  })
+  test('Home Arrivals - Add to basket - items - coupon', async ({page}) => {
+    const singleProductPage = new SingleProductPage(page)
+    const homePage = new HomePage(page)
+    const basketPage = new BasketPage(page)
+    
+    await homePage.navigateToFirstArrival()
+    await singleProductPage.addItemToBasket(20)
+    await singleProductPage.goToCartButton()
+    await basketPage.addCoupon()
+  })
+  test('Home-Arrivals-Add to Basket-Items-Coupon value<450', async({page}) => {
+    const singleProductPage = new SingleProductPage(page)
+    const homePage = new HomePage(page)
+    const basketPage = new BasketPage(page)
+    await homePage.navigateToSecondArrival()
+    await singleProductPage.addOnlyOneItemToBasket(1)
+    await singleProductPage.goToCartButton()
+    await basketPage.addValidCouponButItemPriceIsTooLow()
+  })
+  test('Home-Arrivals-Add to Basket-Items-Remove book', async({page}) => {
+    const singleProductPage = new SingleProductPage(page)
+    const homePage = new HomePage(page)
+    const basketPage = new BasketPage(page)
+    await homePage.navigateToSecondArrival()
+    await singleProductPage.addOnlyOneItemToBasket(1)
+    await singleProductPage.goToCartButton()
+    await basketPage.removeItem()
+  })
+  test('Home-Arrivals-Add to Basket-Items-Add book', async ({page}) => {
+    const singleProductPage = new SingleProductPage(page)
+    const homePage = new HomePage(page)
+    const basketPage = new BasketPage(page)
+    await homePage.navigateToSecondArrival()
+    await singleProductPage.addOnlyOneItemToBasket(1)
+    await singleProductPage.goToCartButton()
+    await basketPage.addItemQuantity()
+  })
 })
