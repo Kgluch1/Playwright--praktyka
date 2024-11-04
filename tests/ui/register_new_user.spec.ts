@@ -40,10 +40,6 @@ test('registration - sign in', async ({page}) => {
 })
 
 test('registration with invalid email', async({page}) => {
-  const newInvalidUser = {
-      email: getRandomEmail('xDD', 15),
-      password: 'nsdmfns231sdsa@'
-    }
     const navigation = new Navigation(page)
     const registerUserPage = new RegisterUserPage(page)
     await navigation.goToMyAccount()
