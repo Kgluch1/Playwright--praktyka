@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ProductsPage } from '../../page-objects/ProductsPage';
 import { SingleProductPage } from '../../page-objects/SingleProductPage';
 import { Navigation } from '../../page-objects/NavigationBar';
-import { RegisterUserPage } from '../../page-objects/registerUserPage';
+import { RegisterUserPage } from '../../page-objects/RegisterUserPage';
 
 function getRandomEmail(domain,length)
 {
